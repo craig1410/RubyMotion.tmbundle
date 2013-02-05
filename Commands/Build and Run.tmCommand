@@ -30,6 +30,8 @@ APPLESCRIPT
 	<string>text</string>
 	<key>outputLocation</key>
 	<string>discard</string>
+	<key>scope</key>
+	<string>source.ruby.motion</string>
 	<key>uuid</key>
 	<string>02005E21-CC68-4788-B207-A6E7A28D87EF</string>
 	<key>version</key>

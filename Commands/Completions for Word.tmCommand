@@ -30,7 +30,7 @@ TextMate::UI.complete(choices, :initial_filter =&gt; ENV['TM_CURRENT_WORD'], :ex
 	<key>outputLocation</key>
 	<string>toolTip</string>
 	<key>scope</key>
-	<string>source.ruby</string>
+	<string>source.ruby.motion</string>
 	<key>uuid</key>
 	<string>46425354-0480-476B-AA15-6A2B4D6DC2B6</string>
 	<key>version</key>
