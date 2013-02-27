@@ -2,6 +2,8 @@
 
 require 'rexml/document'
 require 'pp'
+require_relative 'rexml/sorting'
+# require 'pry'
 
 class RubyMotionCompletion
   def latest_version_path
@@ -47,13 +49,8 @@ class RubyMotionCompletion
     end
       
     # Sort the @fragment
-    @fragment.sort! do | a, b |
-      # Get the display string
-      a_name = a[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
-      b_name = b[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
-
-      a_name <=> b_name
-    end
+    # binding.pry
+    @fragment.sort!
       
     # Remove duplicates, not sure if this really works
     @fragment.uniq!
