@@ -114,7 +114,7 @@ class RubyMotionCompletion
       prefix = prefixes[i] + ":" if prefixes[i] != nil
 
       # Add argument to the array
-      arguments << "%s${%d:%s %s}" % [ prefix, idx, param.attribute("declared_type").to_s, param.attribute("name").to_s ]
+      arguments << "%s${%d:%s %s}" % [prefix, idx, param.attribute("declared_type").to_s, param.attribute("name").to_s]
 
       # Increase counters
       i += 1
@@ -140,7 +140,7 @@ class RubyMotionCompletion
       
       # Prepend method name with class name if this is a class method
       method_name = method.attribute("selector").to_s
-      method_name = "%s.%s" % [ class_name, method_name ] if method.attribute("class_method")
+      method_name = "%s.%s" % [class_name, method_name] if method.attribute("class_method")
 
       # Check for the number of arguments
       case method.get_elements("arg").length
@@ -186,9 +186,9 @@ class RubyMotionCompletion
     const_type = node.attribute("declared_type").to_s
 
     # Make sure the first letter is always uppercase, for RubyMotion
-    const_match = "%s%s" % [ const_match[0,1].upcase, const_match[1..-1] ]
+    const_match = "%s%s" % [const_match[0,1].upcase, const_match[1..-1]]
 
-    const_display = "%s (%s)" % [ const_match, const_type ]
+    const_display = "%s (%s)" % [const_match, const_type]
 
     # Add the element
     @fragment << create_dict(const_display, nil, const_match)
@@ -200,9 +200,9 @@ class RubyMotionCompletion
     enum_val = node.attribute("value").to_s
 
     # Make sure the first letter is always uppercase, for RubyMotion
-    enum_match = "%s%s" % [ enum_match[0,1].upcase, enum_match[1..-1] ]
+    enum_match = "%s%s" % [enum_match[0,1].upcase, enum_match[1..-1]]
 
-    enum_display = "%s (%s)" % [ enum_match, enum_val ]
+    enum_display = "%s (%s)" % [enum_match, enum_val]
 
     # Add the element
     @fragment << create_dict(enum_display, nil, enum_match)
