@@ -15,8 +15,8 @@ class RubyMotionCompletion
   # Compile the RubyMotion completion plist
   def compile
     return unless File.exists? latest_version_path
-    # This will hold the dict fragments
-    fragment = []
+    # This will hold the dict @fragments
+    @fragment = []
 
     bridge_support_files.each do |file_path|
       doc = xml_document(file_path)
@@ -28,21 +28,26 @@ class RubyMotionCompletion
       doc.root.each_element do |node|
         case node.name
         when "class"
-          parse_class(node, fragment)
+          parse_class(node)
         when "informal_protocol"
-          parse_class(node, fragment)
+          parse_class(node)
         when "function"
-          parse_function(node, fragment)
+          parse_function(node)
         when "constant"
-          parse_constant(node, fragment)
+          parse_constant(node)
         when "enum"
-          parse_enum(node, fragment)
+          parse_enum(node)
+        when "cftype"
+        when "function_alias"
+        when "opaque"
+        when "string_constant"
+        when "struct"
         end
       end
     end
       
-    # Sort the fragment
-    fragment.sort! do | a, b |
+    # Sort the @fragment
+    @fragment.sort! do | a, b |
       # Get the display string
       a_name = a[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
       b_name = b[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
@@ -51,10 +56,10 @@ class RubyMotionCompletion
     end
       
     # Remove duplicates, not sure if this really works
-    fragment.uniq!
+    @fragment.uniq!
 
     # Output results
-    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % fragment.to_s.gsub( /\>\</, ">\n<" )
+    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % @fragment.to_s.gsub( /\>\</, ">\n<" )
       
     return plist
   end
@@ -127,11 +132,11 @@ class RubyMotionCompletion
   end
 
   # Returns a valid class definition
-  def parse_class(node, fragment)
+  def parse_class(node)
     class_name = node.attribute( "name" ).to_s
 
-    # Add the main class to the fragment
-    fragment << create_dict( class_name )
+    # Add the main class to the @fragment
+    @fragment << create_dict( class_name )
 
     # Traverse class methods
     node.each_element( "method" ) do |method|
@@ -145,15 +150,15 @@ class RubyMotionCompletion
         
         # No arguments so strip the ':' if there is one
         when 0
-          fragment << create_dict( method_name )
+          @fragment << create_dict( method_name )
         
         # A single argument
         when 1
-          fragment << create_dict( method_name, self.create_insert( method_name, method ) )
+          @fragment << create_dict( method_name, self.create_insert( method_name, method ) )
 
         else
           method_match = method_name.slice( 0, method_name.index( ":" ) )
-          fragment << create_dict( method_name, self.create_insert( method_name, method ), method_match )
+          @fragment << create_dict( method_name, self.create_insert( method_name, method ), method_match )
 
       end
 
@@ -161,7 +166,7 @@ class RubyMotionCompletion
   end
 
   # Returns a valid class definition
-  def parse_function(node, fragment)
+  def parse_function(node)
     function_name = node.attribute( "name" ).to_s
 
     # Check for the number of arguments
@@ -169,17 +174,17 @@ class RubyMotionCompletion
       
       # No arguments so strip the ':' if there is one
       when 0
-        fragment << create_dict( function_name )
+        @fragment << create_dict( function_name )
       
       # More than one argument
       else
-        fragment << create_dict( function_name, self.create_insert( function_name, node ) )
+        @fragment << create_dict( function_name, self.create_insert( function_name, node ) )
 
     end
   end
 
   # Returns a valid constant definition
-  def parse_constant(node, fragment)
+  def parse_constant(node)
     const_match = node.attribute( "name" ).to_s
     const_type = node.attribute( "declared_type" ).to_s
 
@@ -189,11 +194,11 @@ class RubyMotionCompletion
     const_display = "%s (%s)" % [ const_match, const_type ]
 
     # Add the element
-    fragment << create_dict( const_display, nil, const_match )
+    @fragment << create_dict( const_display, nil, const_match )
   end
 
   # Returns a valid enum definition
-  def parse_enum(node, fragment)
+  def parse_enum(node)
     enum_match = node.attribute( "name" ).to_s
     enum_val = node.attribute( "value" ).to_s
 
@@ -203,7 +208,7 @@ class RubyMotionCompletion
     enum_display = "%s (%s)" % [ enum_match, enum_val ]
 
     # Add the element
-    fragment << create_dict( enum_display, nil, enum_match )
+    @fragment << create_dict( enum_display, nil, enum_match )
   end
 
   def ruby_motion_root
