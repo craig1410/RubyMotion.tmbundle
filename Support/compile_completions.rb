@@ -4,23 +4,21 @@ require 'rexml/document'
 require 'pp'
 
 class RubyMotionCompletion
-
-  def ruby_motion_path
-    ruby_motion_root = '/Library/RubyMotion/data'
-    installed_versions = (Dir.entries(ruby_motion_root) - %w[. ..]).select { |entry|
-      File.directory? File.join(ruby_motion_root,entry)
-    }.sort
-    latest_version = installed_versions.last
+  def latest_version_path
     File.join(ruby_motion_root, latest_version, 'BridgeSupport')
+  end
+
+  def bridge_support_files
+    Dir.glob("#{latest_version_path}/*.bridgesupport")
   end
 
   # Compile the RubyMotion completion plist
   def compile
-    return unless File.exists? ruby_motion_path
+    return unless File.exists? latest_version_path
     # This will hold the dict fragments
     fragment = []
 
-    Dir.glob("#{ruby_motion_path}/*.bridgesupport").each do |file_path|
+    bridge_support_files.each do |file_path|
       doc = xml_document(file_path)
 
       next unless doc.root.has_elements?
@@ -217,7 +215,20 @@ class RubyMotionCompletion
     return fragment
   end
 
+  def ruby_motion_root
+    '/Library/RubyMotion/data'
+  end
+
+  def installed_versions
+    (Dir.entries(ruby_motion_root) - %w[. ..]).select { |entry|
+      File.directory? File.join(ruby_motion_root,entry)
+    }.sort
+  end
+
+  def latest_version
+    installed_versions.last
+  end
 end
 
 # Compile the completion tags
-# RubyMotionCompletion.new().compile
+RubyMotionCompletion.new().compile
