@@ -3,81 +3,71 @@
 require 'rexml/document'
 require 'pp'
 
-# RubyMotion Bridgesupport default path
-RubyMotionPath = "/Library/RubyMotion/data/5.1/BridgeSupport/"
-
 class RubyMotionCompletion
+
+  def ruby_motion_path
+    ruby_motion_root = '/Library/RubyMotion/data'
+    installed_versions = (Dir.entries(ruby_motion_root) - %w[. ..]).select { |entry|
+      File.directory? File.join(ruby_motion_root,entry)
+    }.sort
+    latest_version = installed_versions.last
+    File.join(ruby_motion_root, latest_version, 'BridgeSupport')
+  end
 
   # Compile the RubyMotion completion plist
   def compile
-    # Load the directory entries
-    if File.exists? RubyMotionPath
+    return unless File.exists? ruby_motion_path
+    # This will hold the dict fragments
+    fragment = []
 
-      # This will hold the dict fragments
-      fragment = []
+    Dir.glob("#{ruby_motion_path}/*.bridgesupport").each do |file_path|
+      doc = xml_document(file_path)
 
-      Dir.foreach(RubyMotionPath) do |x|
+      next unless doc.root.has_elements?
 
-        if x[0,1] != '.'
+      puts "Compiling: %s" % file_path.split("/").last
 
-          file = File.open( "" << RubyMotionPath << x )
-          doc = REXML::Document.new( file )
-
-          if doc.root.has_elements?
-
-            puts "Compiling: %s" % x
-
-            doc.root.each_element do |node|
-
-              case node.name
-
-                when "class"
-                  self.parse_class( node, fragment )
-
-                when "informal_protocol"
-                  self.parse_class( node, fragment )
-                
-                when "function"
-                  self.parse_function( node, fragment )
-                
-                when "constant"
-                  self.parse_constant( node, fragment )
-                
-                when "enum"
-                  self.parse_enum( node, fragment )
-
-              end
-
-            end
-
-          end
-
+      doc.root.each_element do |node|
+        case node.name
+        when "class"
+          parse_class(node, fragment)
+        when "informal_protocol"
+          parse_class(node, fragment)
+        when "function"
+          parse_function(node, fragment)
+        when "constant"
+          parse_constant(node, fragment)
+        when "enum"
+          parse_enum(node, fragment)
         end
-
       end
-      
-      # Sort the fragment
-      fragment.sort! do | a, b |
-        # Get the display string
-        a_name = a[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
-        b_name = b[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
-
-        a_name <=> b_name
-      end
-      
-      # Remove duplicates, not sure if this really works
-      fragment.uniq!
-
-      # Output results
-      plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % fragment.to_s.gsub( /\>\</, ">\n<" )
-      
-      return plist
     end
+      
+    # Sort the fragment
+    fragment.sort! do | a, b |
+      # Get the display string
+      a_name = a[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
+      b_name = b[1].text.gsub( /[:\.]/, "" ).gsub( /^(.*?)\s\(.*/, "\\1" )
 
+      a_name <=> b_name
+    end
+      
+    # Remove duplicates, not sure if this really works
+    fragment.uniq!
+
+    # Output results
+    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % fragment.to_s.gsub( /\>\</, ">\n<" )
+      
+    return plist
   end
-  
+
+  def xml_document(file_path)
+    file = File.open(file_path)
+    REXML::Document.new(file)
+  end
+
   # Creates a dict element
-  def create_dict( display, insert=nil, match=nil )
+  def create_dict(display, insert=nil, match=nil)
     elem_dict = REXML::Element.new( "dict" )
 
     # Display
@@ -103,7 +93,7 @@ class RubyMotionCompletion
   end
   
   # Create an argument string
-  def create_insert( method_name, method )
+  def create_insert(method_name, method)
     i = 0
     idx = 1
     insert = ""
@@ -139,7 +129,7 @@ class RubyMotionCompletion
   end
 
   # Returns a valid class definition
-  def parse_class( node, fragment )
+  def parse_class(node, fragment)
     class_name = node.attribute( "name" ).to_s
 
     # Add the main class to the fragment
@@ -175,7 +165,7 @@ class RubyMotionCompletion
   end
 
   # Returns a valid class definition
-  def parse_function( node, fragment )
+  def parse_function(node, fragment)
     function_name = node.attribute( "name" ).to_s
 
     # Check for the number of arguments
@@ -196,7 +186,7 @@ class RubyMotionCompletion
   end
 
   # Returns a valid constant definition
-  def parse_constant( node, fragment )
+  def parse_constant(node, fragment)
     const_match = node.attribute( "name" ).to_s
     const_type = node.attribute( "declared_type" ).to_s
 
@@ -212,7 +202,7 @@ class RubyMotionCompletion
   end
 
   # Returns a valid enum definition
-  def parse_enum( node, fragment )
+  def parse_enum(node, fragment)
     enum_match = node.attribute( "name" ).to_s
     enum_val = node.attribute( "value" ).to_s
 
@@ -231,4 +221,3 @@ end
 
 # Compile the completion tags
 # RubyMotionCompletion.new().compile
-
