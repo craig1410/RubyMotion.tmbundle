@@ -158,8 +158,6 @@ class RubyMotionCompletion
       end
 
     end
-    
-    return fragment
   end
 
   # Returns a valid class definition
@@ -178,9 +176,6 @@ class RubyMotionCompletion
         fragment << create_dict( function_name, self.create_insert( function_name, node ) )
 
     end
-
-    return fragment
-
   end
 
   # Returns a valid constant definition
@@ -195,8 +190,6 @@ class RubyMotionCompletion
 
     # Add the element
     fragment << create_dict( const_display, nil, const_match )
-    
-    return fragment
   end
 
   # Returns a valid enum definition
@@ -211,8 +204,6 @@ class RubyMotionCompletion
 
     # Add the element
     fragment << create_dict( enum_display, nil, enum_match )
-    
-    return fragment
   end
 
   def ruby_motion_root
