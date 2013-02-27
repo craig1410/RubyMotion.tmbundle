@@ -5,11 +5,11 @@ require 'pp'
 
 class RubyMotionCompletion
   def latest_version_path
-    File.join(ruby_motion_root, latest_version, 'BridgeSupport')
+    File.join(ruby_motion_root, latest_version)
   end
 
   def bridge_support_files
-    Dir.glob("#{latest_version_path}/*.bridgesupport")
+    Dir.glob("#{latest_version_path}/BridgeSupport/*.bridgesupport")
   end
 
   # Compile the RubyMotion completion plist
