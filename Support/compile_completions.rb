@@ -3,9 +3,13 @@
 require 'rexml/document'
 require 'pp'
 require_relative 'rexml/sorting'
-# require 'pry'
+require 'pry'
 
 class RubyMotionCompletion
+  def initialize
+    raise unless File.exists? latest_version_path
+  end
+
   def latest_version_path
     File.join(ruby_motion_root, latest_version)
   end
@@ -16,7 +20,6 @@ class RubyMotionCompletion
 
   # Compile the RubyMotion completion plist
   def compile
-    return unless File.exists? latest_version_path
     # This will hold the dict @fragments
     @fragment = []
 
@@ -49,16 +52,16 @@ class RubyMotionCompletion
     end
       
     # Sort the @fragment
-    # binding.pry
     @fragment.sort!
       
     # Remove duplicates, not sure if this really works
     @fragment.uniq!
 
-    # Output results
-    plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % @fragment.to_s.gsub(/\>\</, ">\n<")
-      
-    return plist
+    return to_plist
+  end
+
+  def to_plist
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><array>%s</array></plist>"  % @fragment.to_s.gsub(/\>\</, ">\n<")
   end
 
   def xml_document(file_path)
