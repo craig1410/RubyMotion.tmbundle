@@ -2,8 +2,8 @@
 
 require 'rexml/document'
 require 'pp'
-require_relative 'rexml/sorting'
-require 'pry'
+require File.dirname(__FILE__) + "/rexml/sorting"
+# require 'pry'
 
 class RubyMotionCompletion
   def initialize
@@ -154,11 +154,11 @@ class RubyMotionCompletion
         
         # A single argument
         when 1
-          @fragment << create_dict(method_name, self.create_insert(method_name, method))
+          @fragment << create_dict(method_name, create_insert(method_name, method))
 
         else
           method_match = method_name.slice(0, method_name.index(":"))
-          @fragment << create_dict(method_name, self.create_insert(method_name, method), method_match)
+          @fragment << create_dict(method_name, create_insert(method_name, method), method_name)
 
       end
 
@@ -178,7 +178,7 @@ class RubyMotionCompletion
       
       # More than one argument
       else
-        @fragment << create_dict(function_name, self.create_insert(function_name, node))
+        @fragment << create_dict(function_name, create_insert(function_name, node))
 
     end
   end
