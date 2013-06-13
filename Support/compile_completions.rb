@@ -11,7 +11,7 @@ class RubyMotionCompletion
   end
 
   def latest_version_path
-    File.join(ruby_motion_root, latest_version)
+    File.join(ruby_motion_ios_root, latest_version)
   end
 
   def bridge_support_files
@@ -211,13 +211,13 @@ class RubyMotionCompletion
     @fragment << create_dict(enum_display, nil, enum_match)
   end
 
-  def ruby_motion_root
-    '/Library/RubyMotion/data'
+  def ruby_motion_ios_root
+    '/Library/RubyMotion/data/ios'
   end
 
   def installed_versions
-    (Dir.entries(ruby_motion_root) - %w[. ..]).select { |entry|
-      File.directory? File.join(ruby_motion_root,entry)
+    (Dir.entries(ruby_motion_ios_root) - %w[. ..]).select { |entry|
+      File.directory? File.join(ruby_motion_ios_root,entry)
     }.sort
   end
 
